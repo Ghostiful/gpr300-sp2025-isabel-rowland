@@ -52,6 +52,8 @@ int main() {
 	shader.use();
 	shader.setInt("_MainTex", 0);
 
+	shader.setVec3("_EyePos", camera.position);
+
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
 
