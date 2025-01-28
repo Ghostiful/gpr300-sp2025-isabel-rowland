@@ -6,6 +6,7 @@
 #include <ew/model.h>
 #include <ew/camera.h>
 #include <ew/transform.h>
+#include <ew/cameraController.h>
 
 #include <GLFW/glfw3.h>
 #include <imgui.h>
@@ -24,7 +25,9 @@ float prevFrameTime;
 float deltaTime;
 
 ew::Camera camera;
-ew::Transform monkeyTransform;
+ew::CameraController cameraController;
+
+
 
 int main() {
 	GLFWwindow* window = initWindow("Assignment 0", screenWidth, screenHeight);
@@ -35,7 +38,7 @@ int main() {
 
 	ew::Shader shader = ew::Shader("assets/lit.vert", "assets/lit.frag");
 	ew::Model monkeyModel = ew::Model("assets/Suzanne.obj");
-	
+	ew::Transform monkeyTransform;
 	
 	camera.position = glm::vec3(0.0f, 0.0f, 5.0f);
 	camera.target = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -56,9 +59,11 @@ int main() {
 		monkeyTransform.rotation = glm::rotate(monkeyTransform.rotation, deltaTime, glm::vec3(0.0, 1.0, 0.0));
 
 		shader.use();
-		shader.setMat4("_Model", glm::mat4(1.0f));
+		shader.setMat4("_Model", monkeyTransform.modelMatrix());
 		shader.setMat4("_ViewProjection", camera.projectionMatrix() * camera.viewMatrix());
 		monkeyModel.draw(); //Draws monkey model using current shader
+
+		cameraController.move(window, &camera, deltaTime);
 
 		drawUI();
 
@@ -67,13 +72,26 @@ int main() {
 	printf("Shutting down...");
 }
 
+void resetCamera(ew::Camera* camera, ew::CameraController* controller) {
+	camera->position = glm::vec3(0, 0, 5.0f);
+	camera->target = glm::vec3(0);
+	controller->yaw = controller->pitch = 0;
+}
+
 void drawUI() {
 	ImGui_ImplGlfw_NewFrame();
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui::NewFrame();
 
 	ImGui::Begin("Settings");
-	ImGui::Text("Add Controls Here!");
+	if (ImGui::Button("Reset Camera")) {
+		resetCamera(&camera, &cameraController);
+	}
+	//Add more camera settings here!
+	if (ImGui::DragFloat("Change FOV", &camera.fov, 0.1f, 0.0f, 120.0f)) {
+
+	}
+
 	ImGui::End();
 
 	ImGui::Render();
