@@ -7,6 +7,7 @@
 #include <ew/camera.h>
 #include <ew/transform.h>
 #include <ew/cameraController.h>
+#include <ew/texture.h>
 
 #include <GLFW/glfw3.h>
 #include <imgui.h>
@@ -44,6 +45,12 @@ int main() {
 	camera.target = glm::vec3(0.0f, 0.0f, 0.0f);
 	camera.aspectRatio = (float)screenWidth / screenHeight;
 	camera.fov = 60.0f; //Vertical field of view, in degrees
+
+	GLuint brickTexture = ew::loadTexture("assets/brick_color.jpg");
+	glBindTextureUnit(0, brickTexture);
+	//Make "_MainTex" sampler2D sample from the 2D texture bound to unit 0
+	shader.use();
+	shader.setInt("_MainTex", 0);
 
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
