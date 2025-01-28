@@ -28,6 +28,12 @@ float deltaTime;
 ew::Camera camera;
 ew::CameraController cameraController;
 
+struct Material {
+	float Ka = 1.0;
+	float Kd = 0.5;
+	float Ks = 0.5;
+	float Shininess = 128;
+}material;
 
 
 int main() {
@@ -70,6 +76,10 @@ int main() {
 		shader.use();
 		shader.setMat4("_Model", monkeyTransform.modelMatrix());
 		shader.setMat4("_ViewProjection", camera.projectionMatrix() * camera.viewMatrix());
+		shader.setFloat("_Material.Ka", material.Ka);
+		shader.setFloat("_Material.Kd", material.Kd);
+		shader.setFloat("_Material.Ks", material.Ks);
+		shader.setFloat("_Material.Shininess", material.Shininess);
 		monkeyModel.draw(); //Draws monkey model using current shader
 
 		cameraController.move(window, &camera, deltaTime);
@@ -97,9 +107,16 @@ void drawUI() {
 		resetCamera(&camera, &cameraController);
 	}
 	//Add more camera settings here!
-	if (ImGui::DragFloat("Change FOV", &camera.fov, 0.1f, 0.0f, 120.0f)) {
+	if (ImGui::DragFloat("FOV", &camera.fov, 0.1f, 0.0f, 120.0f)) {
 
 	}
+	if (ImGui::CollapsingHeader("Material")) {
+		ImGui::SliderFloat("AmbientK", &material.Ka, 0.0f, 1.0f);
+		ImGui::SliderFloat("DiffuseK", &material.Kd, 0.0f, 1.0f);
+		ImGui::SliderFloat("SpecularK", &material.Ks, 0.0f, 1.0f);
+		ImGui::SliderFloat("Shininess", &material.Shininess, 2.0f, 1024.0f);
+	}
+
 
 	ImGui::End();
 
