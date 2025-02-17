@@ -15,10 +15,10 @@ out Surface{
 
 void main(){
 	//Transform vertex position to World Space.
-vs_out.WorldPos = vec3(_Model * vec4(vPos,1.0));
+	vs_out.WorldPos = vec3(_Model * vec4(vPos,1.0));
 	//Transform vertex normal to world space using Normal Matrix
 	vs_out.WorldNormal = transpose(inverse(mat3(_Model))) * vNormal;
-vs_out.TexCoord = vTexCoord;
-gl_Position = _ViewProjection * _Model * vec4(vPos,1.0);
+	vs_out.TexCoord = vTexCoord;
+	gl_Position = _ViewProjection * _Model * vec4(vPos,1.0);
 }
 
