@@ -73,10 +73,14 @@ int main() {
 	animator.clip->duration = 7;
 	// -- Default keys
 	animator.clip->positionKeys.push_back(ir::Vec3Key(glm::vec3(0, 0, 0), 0));
+	animator.clip->positionKeys.push_back(ir::Vec3Key(glm::vec3(2, 2, 2), 2));
+	animator.clip->positionKeys.push_back(ir::Vec3Key(glm::vec3(1, 1, 1), 5));
 	animator.clip->positionKeys.push_back(ir::Vec3Key(glm::vec3(3, 3, 3), 7));
 	animator.clip->rotationKeys.push_back(ir::Vec3Key(glm::vec3(0, 0, 0), 0));
 	animator.clip->rotationKeys.push_back(ir::Vec3Key(glm::vec3(3, 3, 3), 7));
 	animator.clip->scaleKeys.push_back(ir::Vec3Key(glm::vec3(1, 1, 1), 0));
+	animator.clip->scaleKeys.push_back(ir::Vec3Key(glm::vec3(5, 5, 5), 2));
+	animator.clip->scaleKeys.push_back(ir::Vec3Key(glm::vec3(2, 1, 2), 5));
 	animator.clip->scaleKeys.push_back(ir::Vec3Key(glm::vec3(3, 3, 3), 7));
 	animator.isPlaying = true;
 

@@ -2,6 +2,7 @@
 #include <vector>
 #include <math.h>
 #include <imgui.h>
+//#include <numbers>
 
 // All easing functions are from https://easings.net/
 
@@ -15,7 +16,7 @@ namespace ir {
 		OUT_BACK
 	}; 
 
-	const char* EasingNames[] = {
+	const char* easingNames[] = {
 		"None",
 		"In Out Elastic",
 		"In Sine",
@@ -57,17 +58,6 @@ namespace ir {
 		return EASING_FUNCTIONS[type](val);
 	}
 #pragma endregion
-
-	// Lerping
-	template<class T>
-	T lerp(T a, T b, float v) {
-		return a + (b - a) * v;
-	}
-
-	template<class T>
-	T inverseLerp(T a, T b, float v) {
-		return (v - a) / (b - a);
-	}
 
 	struct Vec3Key {
 		glm::vec3 value;
@@ -184,11 +174,12 @@ namespace ir {
 				return keys.back().value;
 			}
 
-			
-
-			float val = inverseLerp(currentKey->time, nextKey->time, playbackTime);
+			// inverse lerp between times
+			float val = (playbackTime - currentKey->time) / (nextKey->time - currentKey->time);
+			// apply easing function
 			val = ease(val, currentKey->easeType);
-			return lerp(currentKey->value, nextKey->value, val);
+			// lerp between values
+			return currentKey->value + (nextKey->value - currentKey->value) * val;
 		}
 
 		void handleUI() {
@@ -204,7 +195,7 @@ namespace ir {
 						ImGui::PushID(i);
 						ImGui::DragFloat("Time", &clip->positionKeys[i].time, 0.1f);
 						ImGui::DragFloat3("Value", &clip->positionKeys[i].value.x, 0.1f);
-						ImGui::Combo("Easing Type", &clip->positionKeys[i].easeType, EasingNames, EASING_FUNCTIONS.size());
+						ImGui::Combo("Easing Type", &clip->positionKeys[i].easeType, easingNames, EASING_FUNCTIONS.size());
 						ImGui::PopID();
 					}
 
@@ -223,7 +214,7 @@ namespace ir {
 						ImGui::PushID(i);
 						ImGui::DragFloat("Time", &clip->rotationKeys[i].time, 0.1f);
 						ImGui::DragFloat3("Value", &clip->rotationKeys[i].value.x, 0.1f);
-						ImGui::Combo("Easing Type", &clip->rotationKeys[i].easeType, EasingNames, EASING_FUNCTIONS.size());
+						ImGui::Combo("Easing Type", &clip->rotationKeys[i].easeType, easingNames, EASING_FUNCTIONS.size());
 						ImGui::PopID();
 					}
 
@@ -242,7 +233,7 @@ namespace ir {
 						ImGui::PushID(i);
 						ImGui::DragFloat("Time", &clip->scaleKeys[i].time, 0.1f);
 						ImGui::DragFloat3("Value", &clip->scaleKeys[i].value.x, 0.1f);
-						ImGui::Combo("Easing Type", &clip->scaleKeys[i].easeType, EasingNames, EASING_FUNCTIONS.size());
+						ImGui::Combo("Easing Type", &clip->scaleKeys[i].easeType, easingNames, EASING_FUNCTIONS.size());
 						ImGui::PopID();
 					}
 
