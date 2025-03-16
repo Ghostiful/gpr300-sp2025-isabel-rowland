@@ -7,7 +7,7 @@
 namespace ir {
 #pragma region Easing
 	// Easing functions
-	enum EasingType {
+	const enum EasingType {
 		NONE,
 		IN_OUT_ELASTIC,
 		IN_SINE,
@@ -15,6 +15,10 @@ namespace ir {
 	};
 
 	const float PI = 3.141592653;
+
+	float noEasing(float x) {
+		return x;
+	}
 
 	float easeInOutElastic(float x) {
 		const float c5 = (2 * PI) / 4.5;
@@ -39,13 +43,10 @@ namespace ir {
 
 	typedef float EasingFunc(float);
 
-	const std::vector<EasingFunc*> EASING_FUNCTIONS = { easeInOutElastic, easeInSine, easeOutBack};
+	const std::vector<EasingFunc*> EASING_FUNCTIONS = { noEasing, easeInOutElastic, easeInSine, easeOutBack};
 
-	float ease(float x, EasingType type) {
-		if (type == NONE) {
-			return x;
-		}
-		return EASING_FUNCTIONS[type](x);
+	float ease(float val, EasingType type) {
+		return EASING_FUNCTIONS[type](val);
 	}
 #pragma endregion
 
@@ -73,6 +74,7 @@ namespace ir {
 		Vec3Key(glm::vec3 _value, float _time) {
 			value = _value;
 			time = _time;
+			easeType = NONE;
 		}
 	};
 
@@ -98,9 +100,9 @@ namespace ir {
 		Animator() {
 			clip = nullptr;
 			isPlaying = false;
-			playbackSpeed = 0;
+			playbackSpeed = 1;
 			isLooping = false;
-			playbackSpeed = 0;
+			playbackTime = 0;
 		}
 
 		~Animator() {
@@ -139,21 +141,11 @@ namespace ir {
 			Vec3Key* currentKey = nullptr;
 			Vec3Key* nextKey = nullptr;
 
-			for (; index < keys.size(); index++) {
+			for (index = 0; index < keys.size(); index++) {
 				if (playbackTime <= keys[index].time) {
 					nextKey = &keys[index];
 					break;
 				}
-			}
-
-			if (isLooping && nextKey == nullptr) {
-				nextKey = &keys.front();
-				currentKey = &keys.back();
-
-				// Value to lerp to
-				float val = inverseLerp(currentKey->time, nextKey->time, playbackTime);
-				val = ease(val, currentKey->easeType);
-				return lerp(currentKey->value, nextKey->value, val);
 			}
 
 			if (nextKey == nullptr) {

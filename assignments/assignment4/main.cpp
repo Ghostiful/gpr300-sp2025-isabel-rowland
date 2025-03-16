@@ -73,7 +73,7 @@ int main() {
 	animator.clip->rotationKeys.push_back(ir::Vec3Key(glm::vec3(3, 3, 3), 7));
 	animator.clip->scaleKeys.push_back(ir::Vec3Key(glm::vec3(1, 1, 1), 0));
 	animator.clip->scaleKeys.push_back(ir::Vec3Key(glm::vec3(3, 3, 3), 7));
-
+	animator.isPlaying = true;
 
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
@@ -85,6 +85,7 @@ int main() {
 		//RENDER
 		glClearColor(0.6f,0.8f,0.92f,1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 
 		animator.update(deltaTime);
 		monkeyTransform.position = animator.GetNextValue(animator.clip->positionKeys);
