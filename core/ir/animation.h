@@ -158,9 +158,8 @@ namespace ir {
 						currentKey = &keys[index - 1];
 						break;
 					}
-					
 				}
-				else if (playbackSpeed < 0) {
+				else if (playbackSpeed < 0) { // handles playing backwards
 					if (playbackTime >= keys[index].time) {
 						nextKey = &keys[index];
 						currentKey = &keys[index + 1];
@@ -170,6 +169,7 @@ namespace ir {
 				
 			}
 
+			// return last keyframe value if no new key is found
 			if (nextKey == nullptr) {
 				return keys.back().value;
 			}
