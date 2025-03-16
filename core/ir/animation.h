@@ -129,7 +129,7 @@ namespace ir {
 			}
 			if (playbackSpeed < 0 && playbackTime < 0) {
 				if (isLooping) {
-					playbackTime = clip->duration;
+					playbackTime = (playbackTime - dt) + clip->duration;
 				}
 				else {
 					playbackTime = 0;
@@ -151,27 +151,39 @@ namespace ir {
 			Vec3Key* currentKey = nullptr;
 			Vec3Key* nextKey = nullptr;
 
-			for (index = 0; index < keys.size(); index++) {
-				if (playbackSpeed > 0) {
-					if (playbackTime <= keys[index].time) {
-						nextKey = &keys[index];
-						currentKey = &keys[index - 1];
-						break;
+
+			if (playbackSpeed > 0) {
+				float nextKeyTime = clip->duration + 1;
+				for (int i = 0; i < keys.size(); i++) {
+					if (playbackTime <= keys[i].time && keys[i].time < nextKeyTime) {
+						nextKey = &keys[i];
+						nextKeyTime = keys[i].time;
+						index = i;
 					}
 				}
-				else if (playbackSpeed < 0) { // handles playing backwards
-					if (playbackTime >= keys[index].time) {
-						nextKey = &keys[index];
-						currentKey = &keys[index + 1];
-						break;
-					}
-				}
-				
 			}
+			else if (playbackSpeed < 0) {
+				float nextKeyTime = -1;
+				for (int i = keys.size() - 1; i >= 0; i--) {
+					if (playbackTime >= keys[i].time && keys[i].time > nextKeyTime) {
+						nextKey = &keys[i];
+						nextKeyTime = keys[i].time;
+						index = i;
+					}
+				}
+			}
+
 
 			// return last keyframe value if no new key is found
 			if (nextKey == nullptr) {
 				return keys.back().value;
+			}
+
+			if (playbackSpeed > 0) {
+				currentKey = &keys[index - 1];
+			}
+			else if (playbackSpeed < 0) {
+				currentKey = &keys[index + 1];
 			}
 
 			// inverse lerp between times
