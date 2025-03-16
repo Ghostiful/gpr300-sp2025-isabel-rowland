@@ -5,6 +5,7 @@
 // All easing functions are from https://easings.net/
 
 namespace ir {
+#pragma region Easing
 	// Easing functions
 	enum EasingType {
 		NONE,
@@ -46,19 +47,31 @@ namespace ir {
 		}
 		return EASING_FUNCTIONS[type](x);
 	}
-	
+#pragma endregion
+
+	// Lerping
+	template<class T>
+	T lerp(T a, T b, float v) {
+		return a + (b - a) * v;
+	}
+
+	template<class T>
+	T inverseLerp(T a, T b, float v) {
+		return (v - a) / (b - a);
+	}
+
 	struct Vec3Key {
 		glm::vec3 value;
 		float time;
 		EasingType easeType;
 
-		Keyframe() {
+		Vec3Key() {
 			time = -1; // ignore frames with -1 time
 			easeType = NONE;
 		}
 
-		Keyframe(glm::vec3 _value, float _time) {
-			value = _values;
+		Vec3Key(glm::vec3 _value, float _time) {
+			value = _value;
 			time = _time;
 		}
 	};
@@ -75,7 +88,7 @@ namespace ir {
 
 	};
 
-	class Animator {
+	struct Animator {
 		AnimationClip* clip;
 		bool isPlaying;
 		float playbackSpeed; // negatives play backwards
@@ -133,9 +146,25 @@ namespace ir {
 				}
 			}
 
+			if (isLooping && nextKey == nullptr) {
+				nextKey = &keys.front();
+				currentKey = &keys.back();
+
+				// Value to lerp to
+				float val = inverseLerp(currentKey->time, nextKey->time, playbackTime);
+				val = ease(val, currentKey->easeType);
+				return lerp(currentKey->value, nextKey->value, val);
+			}
+
 			if (nextKey == nullptr) {
 				return keys.back().value;
 			}
+
+			currentKey = &keys[index - 1];
+
+			float val = inverseLerp(currentKey->time, nextKey->time, playbackTime);
+			val = ease(val, currentKey->easeType);
+			return lerp(currentKey->value, nextKey->value, val);
 		}
 	};
 

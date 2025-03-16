@@ -14,6 +14,8 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
+#include <ir/animation.h>
+
 void framebufferSizeCallback(GLFWwindow* window, int width, int height);
 GLFWwindow* initWindow(const char* title, int width, int height);
 
@@ -60,6 +62,19 @@ int main() {
 
 	shader.setVec3("_EyePos", camera.position);
 
+	// Animation
+	ir::Animator animator;
+	animator.clip = new ir::AnimationClip();
+	animator.clip->duration = 7;
+	// -- Default keys
+	animator.clip->positionKeys.push_back(ir::Vec3Key(glm::vec3(0, 0, 0), 0));
+	animator.clip->positionKeys.push_back(ir::Vec3Key(glm::vec3(3, 3, 3), 7));
+	animator.clip->rotationKeys.push_back(ir::Vec3Key(glm::vec3(0, 0, 0), 0));
+	animator.clip->rotationKeys.push_back(ir::Vec3Key(glm::vec3(3, 3, 3), 7));
+	animator.clip->scaleKeys.push_back(ir::Vec3Key(glm::vec3(1, 1, 1), 0));
+	animator.clip->scaleKeys.push_back(ir::Vec3Key(glm::vec3(3, 3, 3), 7));
+
+
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
 
@@ -71,7 +86,10 @@ int main() {
 		glClearColor(0.6f,0.8f,0.92f,1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		monkeyTransform.rotation = glm::rotate(monkeyTransform.rotation, deltaTime, glm::vec3(0.0, 1.0, 0.0));
+		animator.update(deltaTime);
+		monkeyTransform.position = animator.GetNextValue(animator.clip->positionKeys);
+		monkeyTransform.rotation = animator.GetNextValue(animator.clip->rotationKeys);
+		monkeyTransform.scale = animator.GetNextValue(animator.clip->scaleKeys);
 
 		shader.use();
 		shader.setMat4("_Model", monkeyTransform.modelMatrix());
