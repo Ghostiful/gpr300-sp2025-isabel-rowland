@@ -37,6 +37,11 @@ struct Material {
 	float Shininess = 128;
 }material;
 
+void resetCamera(ew::Camera* camera, ew::CameraController* controller) {
+	camera->position = glm::vec3(0, 0, 5.0f);
+	camera->target = glm::vec3(0);
+	controller->yaw = controller->pitch = 0;
+} 
 
 int main() {
 	GLFWwindow* window = initWindow("Assignment 0", screenWidth, screenHeight);
@@ -103,18 +108,43 @@ int main() {
 
 		cameraController.move(window, &camera, deltaTime);
 
-		drawUI();
+		
+		//UI
+		ImGui_ImplGlfw_NewFrame();
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui::NewFrame();
+
+		ImGui::Begin("Settings");
+		if (ImGui::Button("Reset Camera")) {
+			resetCamera(&camera, &cameraController);
+		}
+		//Add more camera settings here!
+		if (ImGui::DragFloat("FOV", &camera.fov, 0.1f, 0.0f, 120.0f)) {
+
+		}
+		if (ImGui::CollapsingHeader("Material")) {
+			ImGui::SliderFloat("AmbientK", &material.Ka, 0.0f, 1.0f);
+			ImGui::SliderFloat("DiffuseK", &material.Kd, 0.0f, 1.0f);
+			ImGui::SliderFloat("SpecularK", &material.Ks, 0.0f, 1.0f);
+			ImGui::SliderFloat("Shininess", &material.Shininess, 2.0f, 1024.0f);
+		}
+		
+		animator.handleUI();
+
+
+		ImGui::End();
+
+		ImGui::Render();
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+
 
 		glfwSwapBuffers(window);
 	}
 	printf("Shutting down...");
 }
 
-void resetCamera(ew::Camera* camera, ew::CameraController* controller) {
-	camera->position = glm::vec3(0, 0, 5.0f);
-	camera->target = glm::vec3(0);
-	controller->yaw = controller->pitch = 0;
-}
+
 
 void drawUI() {
 	ImGui_ImplGlfw_NewFrame();
@@ -135,6 +165,10 @@ void drawUI() {
 		ImGui::SliderFloat("SpecularK", &material.Ks, 0.0f, 1.0f);
 		ImGui::SliderFloat("Shininess", &material.Shininess, 2.0f, 1024.0f);
 	}
+	// Animation
+	//if (ImGui::CollapsingHeader("Position Keyframes")) {
+	//	for (int i = 0; i <)
+	//}
 
 
 	ImGui::End();
