@@ -5,6 +5,7 @@
 //#include <numbers>
 
 // All easing functions are from https://easings.net/
+// Quick sort code is from https://www.geeksforgeeks.org/cpp-program-for-quicksort/
 
 namespace ir {
 #pragma region Easing
@@ -90,6 +91,31 @@ namespace ir {
 			duration = -1;
 		}
 
+		int partition(std::vector<Vec3Key>& keys, int low, int high) {
+			float pivot = keys[high].time;
+			int i = (low - 1);
+
+			for (int j = low; j <= high - 1; j++) {
+				if (keys[j].time <= pivot) {
+					i++;
+					std::swap(keys[i], keys[j]);
+				}
+			}
+
+			std::swap(keys[i + 1], keys[high]);
+
+			return (i + 1);
+		}
+
+		void sortKeys(std::vector<Vec3Key>& keys, int low, int high) {
+			if (low < high) {
+				int pi = partition(keys, low, high);
+
+				sortKeys(keys, low, pi - 1);
+				sortKeys(keys, pi + 1, high);
+			}
+		}
+
 	};
 
 	struct Animator {
@@ -151,39 +177,27 @@ namespace ir {
 			Vec3Key* currentKey = nullptr;
 			Vec3Key* nextKey = nullptr;
 
-
-			if (playbackSpeed > 0) {
-				float nextKeyTime = clip->duration + 1;
-				for (int i = 0; i < keys.size(); i++) {
-					if (playbackTime <= keys[i].time && keys[i].time < nextKeyTime) {
-						nextKey = &keys[i];
-						nextKeyTime = keys[i].time;
-						index = i;
+			for (index = 0; index < keys.size(); index++) {
+				if (playbackSpeed > 0) {
+					if (playbackTime <= keys[index].time) {
+						nextKey = &keys[index];
+						currentKey = &keys[index - 1];
+						break;
 					}
 				}
-			}
-			else if (playbackSpeed < 0) {
-				float nextKeyTime = -1;
-				for (int i = keys.size() - 1; i >= 0; i--) {
-					if (playbackTime >= keys[i].time && keys[i].time > nextKeyTime) {
-						nextKey = &keys[i];
-						nextKeyTime = keys[i].time;
-						index = i;
+				else if (playbackSpeed < 0) { // handles playing backwards
+					if (playbackTime >= keys[index].time) {
+						nextKey = &keys[index];
+						currentKey = &keys[index + 1];
+						break;
 					}
 				}
-			}
 
+			}
 
 			// return last keyframe value if no new key is found
 			if (nextKey == nullptr) {
 				return keys.back().value;
-			}
-
-			if (playbackSpeed > 0) {
-				currentKey = &keys[index - 1];
-			}
-			else if (playbackSpeed < 0) {
-				currentKey = &keys[index + 1];
 			}
 
 			// inverse lerp between times
@@ -211,6 +225,10 @@ namespace ir {
 						ImGui::PopID();
 					}
 
+					if (ImGui::Button("Sort Keyframes")) {
+						clip->sortKeys(clip->positionKeys, 0, clip->positionKeys.size() - 1);
+					}
+
 					if (ImGui::Button("Add Keyframe")) {
 						clip->positionKeys.push_back(Vec3Key(glm::vec3(0, 0, 0), -1));
 					}
@@ -228,6 +246,10 @@ namespace ir {
 						ImGui::DragFloat3("Value", &clip->rotationKeys[i].value.x, 0.1f);
 						ImGui::Combo("Easing Type", &clip->rotationKeys[i].easeType, easingNames, EASING_FUNCTIONS.size());
 						ImGui::PopID();
+					}
+
+					if (ImGui::Button("Sort Keyframes")) {
+						clip->sortKeys(clip->rotationKeys, 0, clip->rotationKeys.size() - 1);
 					}
 
 					if (ImGui::Button("Add Keyframe")) {
@@ -249,6 +271,10 @@ namespace ir {
 						ImGui::PopID();
 					}
 
+					if (ImGui::Button("Sort Keyframes")) {
+						clip->sortKeys(clip->scaleKeys, 0, clip->scaleKeys.size() - 1);
+					}
+
 					if (ImGui::Button("Add Keyframe")) {
 						clip->scaleKeys.push_back(Vec3Key(glm::vec3(0, 0, 0), -1));
 					}
@@ -257,6 +283,7 @@ namespace ir {
 							clip->scaleKeys.erase(std::find(clip->scaleKeys.begin(), clip->scaleKeys.end(), clip->scaleKeys.back()));
 						}
 					}
+
 				}
 
 			}

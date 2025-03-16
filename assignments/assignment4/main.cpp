@@ -95,7 +95,7 @@ int main() {
 		glClearColor(0.6f,0.8f,0.92f,1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-
+		// Animation
 		animator.update(deltaTime);
 		monkeyTransform.position = animator.GetNextValue(animator.clip->positionKeys);
 		monkeyTransform.rotation = animator.GetNextValue(animator.clip->rotationKeys);
