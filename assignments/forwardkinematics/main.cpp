@@ -145,10 +145,10 @@ int main() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		// Animation
-		animator.update(deltaTime);
-		skeleton.joints[0]->localPose.position = animator.GetNextValue(animator.clip->positionKeys);
-		skeleton.joints[0]->localPose.rotation = animator.GetNextValue(animator.clip->rotationKeys);
-		skeleton.joints[0]->localPose.scale = animator.GetNextValue(animator.clip->scaleKeys);
+		//animator.update(deltaTime);
+		//skeleton.joints[0]->localPose.position = animator.GetNextValue(animator.clip->positionKeys);
+		//skeleton.joints[0]->localPose.rotation = animator.GetNextValue(animator.clip->rotationKeys);
+		//skeleton.joints[0]->localPose.scale = animator.GetNextValue(animator.clip->scaleKeys);
 
 		ir::solveFK(skeleton);
 
@@ -211,8 +211,8 @@ int main() {
 
 		ImGui::End();
 
-		ImGui::SetNextWindowPos({ 600, 50 });
-		ImGui::SetNextWindowSize({ 200, 250 });
+		ImGui::SetNextWindowPos({ 800, 50 });
+		ImGui::SetNextWindowSize({ 250, 150 });
 
 		ImGui::Begin("Kinematics");
 
