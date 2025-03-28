@@ -15,6 +15,7 @@
 #include <imgui_impl_opengl3.h>
 
 #include <ir/animation.h>
+#include <ir/animHierarchy.h>
 
 void framebufferSizeCallback(GLFWwindow* window, int width, int height);
 GLFWwindow* initWindow(const char* title, int width, int height);
@@ -41,7 +42,7 @@ void resetCamera(ew::Camera* camera, ew::CameraController* controller) {
 	camera->position = glm::vec3(0, 0, 5.0f);
 	camera->target = glm::vec3(0);
 	controller->yaw = controller->pitch = 0;
-} 
+}
 
 int main() {
 	GLFWwindow* window = initWindow("Assignment 0", screenWidth, screenHeight);
@@ -54,6 +55,54 @@ int main() {
 	ew::Model monkeyModel = ew::Model("assets/Suzanne.obj");
 	ew::Transform monkeyTransform;
 	
+	//Forward kinematics
+	ir::Skeleton skeleton;
+	skeleton.joints.push_back(new ir::Joint("Hips")); // 0
+	skeleton.joints.push_back(new ir::Joint("Torso", skeleton.joints[0])); // 1
+	skeleton.joints.push_back(new ir::Joint("Shoulder_R", skeleton.joints[1])); // 2
+	skeleton.joints.push_back(new ir::Joint("Shoulder_L", skeleton.joints[1])); // 3
+	skeleton.joints.push_back(new ir::Joint("Knee_R", skeleton.joints[0])); // 4
+	skeleton.joints.push_back(new ir::Joint("Knee_L", skeleton.joints[0])); // 5
+	skeleton.joints.push_back(new ir::Joint("Elbow_R", skeleton.joints[2])); // 6
+	skeleton.joints.push_back(new ir::Joint("Elbow_L", skeleton.joints[3])); // 7
+	skeleton.joints.push_back(new ir::Joint("Wrist_R", skeleton.joints[6])); // 8
+	skeleton.joints.push_back(new ir::Joint("Wrist_L", skeleton.joints[7])); // 9
+	skeleton.joints.push_back(new ir::Joint("Ankle_R", skeleton.joints[4])); // 10
+	skeleton.joints.push_back(new ir::Joint("Ankle_L", skeleton.joints[5])); // 11
+	
+	skeleton.joints[0]->localPose.position = glm::vec3(0, 2, 0);
+	skeleton.joints[1]->localPose.position = glm::vec3(0, 2, 0);
+	skeleton.joints[2]->localPose.position = glm::vec3(1.5, 0, 0);
+	skeleton.joints[3]->localPose.position = glm::vec3(-1.5, 0, 0);
+	skeleton.joints[4]->localPose.position = glm::vec3(1, -1, 0);
+	skeleton.joints[5]->localPose.position = glm::vec3(-1, -1, 0);
+	skeleton.joints[6]->localPose.position = glm::vec3(1.3, 0, 0);
+	skeleton.joints[7]->localPose.position = glm::vec3(-1.3, 0, 0);
+	skeleton.joints[8]->localPose.position = glm::vec3(1.3, 0, 0);
+	skeleton.joints[9]->localPose.position = glm::vec3(-1.3, 0, 0);
+	skeleton.joints[10]->localPose.position = glm::vec3(0.1, -1.5, 0);
+	skeleton.joints[11]->localPose.position = glm::vec3(-0.1, -1.5, 0);
+
+	skeleton.joints[0]->localPose.scale = glm::vec3(1, 1, 1);
+	skeleton.joints[1]->localPose.scale = glm::vec3(1.2, 1.2, 1.2);
+	skeleton.joints[2]->localPose.scale = glm::vec3(0.7, 0.7, 0.7);
+	skeleton.joints[3]->localPose.scale = glm::vec3(0.7, 0.7, 0.7);
+	skeleton.joints[4]->localPose.scale = glm::vec3(0.7, 0.7, 0.7);
+	skeleton.joints[5]->localPose.scale = glm::vec3(0.7, 0.7, 0.7);
+	skeleton.joints[6]->localPose.scale = glm::vec3(0.7, 0.7, 0.7);
+	skeleton.joints[7]->localPose.scale = glm::vec3(0.7, 0.7, 0.7);
+	skeleton.joints[8]->localPose.scale = glm::vec3(0.7, 0.7, 0.7);
+	skeleton.joints[9]->localPose.scale = glm::vec3(0.7, 0.7, 0.7);
+	skeleton.joints[10]->localPose.scale = glm::vec3(0.7, 0.7, 0.7);
+	skeleton.joints[11]->localPose.scale = glm::vec3(0.7, 0.7, 0.7);
+
+
+
+	ir::solveFK(skeleton);
+
+	ir::Joint* selectedJoint = nullptr;
+
+
 	camera.position = glm::vec3(0.0f, 0.0f, 5.0f);
 	camera.target = glm::vec3(0.0f, 0.0f, 0.0f);
 	camera.aspectRatio = (float)screenWidth / screenHeight;
@@ -71,7 +120,17 @@ int main() {
 	ir::Animator animator;
 	animator.clip = new ir::AnimationClip();
 	animator.clip->duration = 7;
-	
+	// -- Default keys
+	animator.clip->positionKeys.push_back(ir::Vec3Key(glm::vec3(0, 0, 0), 0));
+	animator.clip->positionKeys.push_back(ir::Vec3Key(glm::vec3(2, 2, 2), 2));
+	animator.clip->positionKeys.push_back(ir::Vec3Key(glm::vec3(1, 1, 1), 5));
+	animator.clip->positionKeys.push_back(ir::Vec3Key(glm::vec3(3, 3, 3), 7));
+	animator.clip->rotationKeys.push_back(ir::Vec3Key(glm::vec3(0, 0, 0), 0));
+	animator.clip->rotationKeys.push_back(ir::Vec3Key(glm::vec3(3, 3, 3), 7));
+	animator.clip->scaleKeys.push_back(ir::Vec3Key(glm::vec3(1, 1, 1), 0));
+	animator.clip->scaleKeys.push_back(ir::Vec3Key(glm::vec3(5, 5, 5), 2));
+	animator.clip->scaleKeys.push_back(ir::Vec3Key(glm::vec3(2, 1, 2), 5));
+	animator.clip->scaleKeys.push_back(ir::Vec3Key(glm::vec3(3, 3, 3), 7));
 	animator.isPlaying = true;
 
 	while (!glfwWindowShouldClose(window)) {
@@ -82,27 +141,42 @@ int main() {
 		prevFrameTime = time;
 
 		//RENDER
-		glClearColor(0.6f,0.8f,0.92f,1.0f);
+		glClearColor(0.6f, 0.8f, 0.92f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		// Animation
 		animator.update(deltaTime);
-		monkeyTransform.position = animator.GetNextValue(animator.clip->positionKeys);
-		monkeyTransform.rotation = animator.GetNextValue(animator.clip->rotationKeys);
-		monkeyTransform.scale = animator.GetNextValue(animator.clip->scaleKeys);
+		skeleton.joints[0]->localPose.position = animator.GetNextValue(animator.clip->positionKeys);
+		skeleton.joints[0]->localPose.rotation = animator.GetNextValue(animator.clip->rotationKeys);
+		skeleton.joints[0]->localPose.scale = animator.GetNextValue(animator.clip->scaleKeys);
+
+		ir::solveFK(skeleton);
 
 		shader.use();
-		shader.setMat4("_Model", monkeyTransform.modelMatrix());
 		shader.setMat4("_ViewProjection", camera.projectionMatrix() * camera.viewMatrix());
 		shader.setFloat("_Material.Ka", material.Ka);
 		shader.setFloat("_Material.Kd", material.Kd);
 		shader.setFloat("_Material.Ks", material.Ks);
 		shader.setFloat("_Material.Shininess", material.Shininess);
-		monkeyModel.draw(); //Draws monkey model using current shader
+		for each(ir::Joint * j in skeleton.joints) {
+
+			shader.setMat4("_Model", j->globalMat4);
+			
+			monkeyModel.draw(); //Draws monkey model using current shader
+		}
+
+		
+		//shader.setMat4("_Model", monkeyTransform.modelMatrix());
+		//shader.setMat4("_ViewProjection", camera.projectionMatrix() * camera.viewMatrix());
+		//shader.setFloat("_Material.Ka", material.Ka);
+		//shader.setFloat("_Material.Kd", material.Kd);
+		//shader.setFloat("_Material.Ks", material.Ks);
+		//shader.setFloat("_Material.Shininess", material.Shininess);
+		//monkeyModel.draw(); //Draws monkey model using current shader
 
 		cameraController.move(window, &camera, deltaTime);
 
-		
+
 		//UI
 		ImGui_ImplGlfw_NewFrame();
 		ImGui_ImplOpenGL3_NewFrame();
@@ -122,9 +196,29 @@ int main() {
 			ImGui::SliderFloat("SpecularK", &material.Ks, 0.0f, 1.0f);
 			ImGui::SliderFloat("Shininess", &material.Shininess, 2.0f, 1024.0f);
 		}
-		
-		animator.handleUI();
 
+		animator.handleUI();
+		if (ImGui::CollapsingHeader("Kinematics")) {
+			skeleton.handleUI();
+		}
+		for each(ir::Joint * j in skeleton.joints) {
+			if (j->isClicked) {
+				selectedJoint = j;
+				j->isClicked = false;
+			}
+		}
+		
+
+		ImGui::End();
+
+		ImGui::SetNextWindowPos({ 600, 50 });
+		ImGui::SetNextWindowSize({ 200, 250 });
+
+		ImGui::Begin("Kinematics");
+
+		if (selectedJoint != nullptr) {
+			selectedJoint->inspectorUI();
+		}
 
 		ImGui::End();
 
